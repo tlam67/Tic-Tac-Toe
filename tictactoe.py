@@ -1,3 +1,10 @@
+########################################
+# Written by Tristan Lam for 
+# Junior Developer application at Tuq
+#######################################
+
+
+
 import pygame as pg #import pygame for GUI
 
 
