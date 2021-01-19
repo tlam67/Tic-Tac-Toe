@@ -1,71 +1,63 @@
-import pygame as pg
+import pygame as pg #import pygame for GUI
 
 
-
-
-
-# function to check if won
-
-# function to check if draw
-
-# pygame allow clickable interface
-
-# game loop:
-    # alternate between X and O
-    # after each placement, check if player wins
-
-
-#initialize pygame
+# initialize pygame and the 2d array to form the backend of the board
 pg.init()
 
-
-
 grid = []
-
-
 for row in range(3):
     grid.append([])
     for column in range(3):
         grid[row].append(0)
 
 
-
+# XO tracks whose turn it is, represented by 0 and 1
 XO: int = 0
 
+# initialize width and height of window
 HEIGHT: int = 500
 WIDTH: int = 500
-MARGIN: int = 10
 
+# constants for commonly used colours
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
+# create the display and set title
 screen = pg.display.set_mode((WIDTH, HEIGHT))
-
 pg.display.set_caption("Tic Tac Toe")
 
 
+# takes in a pygame display and draws the tic tac toe board
 def initialize_board(display):
+    # get surface of display and fill white
     background = pg.Surface(display.get_size())
     background = background.convert()
-    background.fill((250, 250, 250))
+    background.fill(WHITE)
 
-    pg.draw.line(background, (0,0,0), ((WIDTH // 3), 0), ((WIDTH // 3), HEIGHT), 2)
-    pg.draw.line(background, (0,0,0), (2 * (WIDTH //3), 0), (2 * (WIDTH // 3), HEIGHT), 2)
+    #draw 2 vertical lines
+    pg.draw.line(background, BLACK, ((WIDTH // 3), 0), ((WIDTH // 3), HEIGHT), 2)
+    pg.draw.line(background, BLACK, (2 * (WIDTH //3), 0), (2 * (WIDTH // 3), HEIGHT), 2)
 
-    pg.draw.line(background, (0,0,0), (0, (HEIGHT // 3)), (WIDTH, (HEIGHT // 3)), 2)
-    pg.draw.line(background, (0,0,0), (0, 2 * (HEIGHT // 3)), (WIDTH, 2 * (HEIGHT // 3)), 2)
+    #draw 2 horizontal lines
+    pg.draw.line(background, BLACK, (0, (HEIGHT // 3)), (WIDTH, (HEIGHT // 3)), 2)
+    pg.draw.line(background, BLACK, (0, 2 * (HEIGHT // 3)), (WIDTH, 2 * (HEIGHT // 3)), 2)
 
+    #return the display of the board
     return background
 
 
+# takes in x and y coordinates of a mouse click and returns which cell was clicked
 def click_position(x, y):
+    
+    #find the row
     if y < HEIGHT // 3:
         row = 0
     elif HEIGHT // 3 <= y <= 2 * (HEIGHT // 3):
         row = 1
     else:
         row = 2
-
+    
+    #find the column
     if x < WIDTH // 3:
         col = 0
     elif WIDTH // 3 <= x <= 2 * (WIDTH // 3):
@@ -75,14 +67,18 @@ def click_position(x, y):
 
     return (row, col)
 
-
+# takes in the board, finds the position of the mouse click, and updates the backend array accordingly
 def click_board(board):
+    #get the mouse coordinates
     (mouseX, mouseY) = pg.mouse.get_pos()
 
+    #get the row and column (cell) of the mouse click
     (row, col) = click_position(mouseX, mouseY)
 
+    #using turn tracker
     global grid, XO
 
+    #update the backend array
     if grid[row][col] == 0:
         if XO == 0:
             grid[row][col] = "X"
@@ -90,22 +86,59 @@ def click_board(board):
         else:
             grid[row][col] = "O"
             XO = 0
+
+
+#def get_position():
+#    (mouseX, mouseY) = pg.mouse.get_pos()
+#    (row, col) = click_position(mouseX, mouseY)
+#    return (row, col)
+
+
+
+def has_won():
+
+    for row in range(3):
+        if grid[row][0] == grid[row][1] == grid[row][2] and grid[row][0] != 0:
+            return True
+    
+    for col in range(3):
+        if grid[0][col] == grid[1][col] == grid[2][col] and grid[0][col] != 0:
+            return True
+
+    if grid[0][0] == grid[1][1] == grid[2][2] and grid[1][1] != 0:
+        return True
+
+    if grid[0][2] == grid[1][1] == grid[2][0] and grid[1][1] != 0:
+        return True
+    
+    return False
+
+def display_game_state():
+    global XO
+
+    if XO == 1:
+        msg = "X has won!"
     else:
-        print("space taken")
+        msg = "O has won!"
 
-    print(grid)
+    font = pg.font.Font(None, 24)
+    text = font.render(msg, 1, (10, 10, 10))
 
-
-
-
-
-def print_position():
-    (mouseX, mouseY) = pg.mouse.get_pos()
-    (row, col) = click_position(mouseX, mouseY)
-    print("Row: {}".format(row))
-    print("Col: {}".format(col))
+    board.fill((250, 250, 250)) 
+    board.blit(text, ((WIDTH // 2) - 30, 50))
 
 
+def display_move(row, col, board):
+    center_x = ((WIDTH // 3) * col) + (WIDTH // 6)
+    center_y = ((HEIGHT // 3) * row) + (HEIGHT // 6)
+
+    global XO
+
+    if XO == 0:
+        pg.draw.circle(board, BLACK, (center_x, center_y), 44, 2)
+    else:
+        pg.draw.line(board, BLACK, (center_x - 50, center_y - 50), (center_x + 50, center_y + 50))
+        pg.draw.line(board, BLACK, (center_x - 50, center_y + 50), (center_x + 50, center_y - 50))
 
 board = initialize_board(screen)
 
@@ -117,7 +150,12 @@ while running:
             running = False
         elif event.type == pg.MOUSEBUTTONDOWN:
             click_board(board)
-            print_position()
+            (row, col) = get_position()
+            display_move(row, col, board)
+            if has_won():
+                screen.fill(WHITE)
+                display_game_state()
+            
 
         screen.blit(board, (0,0))
         pg.display.flip()
