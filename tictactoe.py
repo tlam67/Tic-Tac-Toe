@@ -88,73 +88,99 @@ def click_board(board):
             XO = 0
 
 
-#def get_position():
-#    (mouseX, mouseY) = pg.mouse.get_pos()
-#    (row, col) = click_position(mouseX, mouseY)
-#    return (row, col)
-
-
-
+# checks if the game has been won 
 def has_won():
 
+    #checking win by row
     for row in range(3):
         if grid[row][0] == grid[row][1] == grid[row][2] and grid[row][0] != 0:
             return True
     
+    #checking win by column
     for col in range(3):
         if grid[0][col] == grid[1][col] == grid[2][col] and grid[0][col] != 0:
             return True
 
+    #checking win by diagonal
     if grid[0][0] == grid[1][1] == grid[2][2] and grid[1][1] != 0:
         return True
 
+    #checking win by diagonal
     if grid[0][2] == grid[1][1] == grid[2][0] and grid[1][1] != 0:
         return True
     
     return False
 
-def display_game_state():
+#checks if the game is a draw
+def is_draw():
+    for row in grid:
+        for val in row:
+            if val == 0:
+                return False
+    return True
+
+
+# displays msg telling which player won or if the match was a draw
+def display_game_state(won, draw):
     global XO
 
-    if XO == 1:
-        msg = "X has won!"
-    else:
-        msg = "O has won!"
+    #print winner message
+    if won:
+        if XO == 1:
+            msg = "X has won!"
+        else:
+            msg = "O has won!"
+    
+    if draw:
+        msg = "Draw!"
 
+    #use pygame font to display text on board
     font = pg.font.Font(None, 24)
     text = font.render(msg, 1, (10, 10, 10))
-
     board.fill((250, 250, 250)) 
     board.blit(text, ((WIDTH // 2) - 30, 50))
 
 
+# updates the board in the GUI to reflect new placement of pieces
 def display_move(row, col, board):
+
+    #find the center of the cell
     center_x = ((WIDTH // 3) * col) + (WIDTH // 6)
     center_y = ((HEIGHT // 3) * row) + (HEIGHT // 6)
 
     global XO
 
+    #draw either circle or x in the center
     if XO == 0:
         pg.draw.circle(board, BLACK, (center_x, center_y), 44, 2)
     else:
         pg.draw.line(board, BLACK, (center_x - 50, center_y - 50), (center_x + 50, center_y + 50))
         pg.draw.line(board, BLACK, (center_x - 50, center_y + 50), (center_x + 50, center_y - 50))
 
-board = initialize_board(screen)
 
+# initialize board and gameloop
+board = initialize_board(screen)
 running = True
 
+#gameloop
 while running:
+    
+    #listening for pygame events
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
         elif event.type == pg.MOUSEBUTTONDOWN:
             click_board(board)
-            (row, col) = get_position()
+            (mouseX, mouseY) = pg.mouse.get_pos()
+            (row, col) = click_position(mouseX, mouseY)
             display_move(row, col, board)
+            print(grid)
             if has_won():
                 screen.fill(WHITE)
-                display_game_state()
+                display_game_state(True, False)
+            elif is_draw():
+                screen.fill(WHITE)
+                display_game_state(False, True)
             
 
         screen.blit(board, (0,0))
