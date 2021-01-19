@@ -20,17 +20,17 @@ pg.init()
 
 
 
-board = []
+grid = []
 
 
 for row in range(3):
-    board.append([])
+    grid.append([])
     for column in range(3):
-        board[row].append(0)
+        grid[row].append(0)
 
 
 
-XO: str = "X"
+XO: int = 0
 
 HEIGHT: int = 500
 WIDTH: int = 500
@@ -75,6 +75,30 @@ def click_position(x, y):
 
     return (row, col)
 
+
+def click_board(board):
+    (mouseX, mouseY) = pg.mouse.get_pos()
+
+    (row, col) = click_position(mouseX, mouseY)
+
+    global grid, XO
+
+    if grid[row][col] == 0:
+        if XO == 0:
+            grid[row][col] = "X"
+            XO = 1
+        else:
+            grid[row][col] = "O"
+            XO = 0
+    else:
+        print("space taken")
+
+    print(grid)
+
+
+
+
+
 def print_position():
     (mouseX, mouseY) = pg.mouse.get_pos()
     (row, col) = click_position(mouseX, mouseY)
@@ -92,6 +116,7 @@ while running:
         if event.type == pg.QUIT:
             running = False
         elif event.type == pg.MOUSEBUTTONDOWN:
+            click_board(board)
             print_position()
 
         screen.blit(board, (0,0))
