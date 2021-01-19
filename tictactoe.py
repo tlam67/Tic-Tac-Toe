@@ -30,6 +30,8 @@ for row in range(3):
 
 
 
+XO: str = "X"
+
 HEIGHT: int = 500
 WIDTH: int = 500
 MARGIN: int = 10
@@ -56,6 +58,29 @@ def initialize_board(display):
     return background
 
 
+def click_position(x, y):
+    if y < HEIGHT // 3:
+        row = 0
+    elif HEIGHT // 3 <= y <= 2 * (HEIGHT // 3):
+        row = 1
+    else:
+        row = 2
+
+    if x < WIDTH // 3:
+        col = 0
+    elif WIDTH // 3 <= x <= 2 * (WIDTH // 3):
+        col = 1
+    else:
+        col = 2
+
+    return (row, col)
+
+def print_position():
+    (mouseX, mouseY) = pg.mouse.get_pos()
+    (row, col) = click_position(mouseX, mouseY)
+    print("Row: {}".format(row))
+    print("Col: {}".format(col))
+
 
 
 board = initialize_board(screen)
@@ -67,8 +92,8 @@ while running:
         if event.type == pg.QUIT:
             running = False
         elif event.type == pg.MOUSEBUTTONDOWN:
-            print("click")
-        
+            print_position()
+
         screen.blit(board, (0,0))
         pg.display.flip()
 
